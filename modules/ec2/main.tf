@@ -1,3 +1,7 @@
+data "template_file" "user_data" {
+  template = "${file("~/docker.sh")}"
+}
+
 resource "aws_instance" "rancher-server" {
   for_each                = var.instances
   ami                     = var.ami
@@ -7,12 +11,7 @@ resource "aws_instance" "rancher-server" {
   disable_api_stop        = false
   key_name                = var.key_name
 
-  user_data = <<EOF
-    #!/bin/bash
-    sudo su
-    curl https://releases.rancher.com/install-docker/19.03.sh | sh
-    usermod -aG docker ubuntu
-  EOF
+  user_data    =  "${data.template_file.user_data.rendered}"
 
   root_block_device {
     encrypted = true
